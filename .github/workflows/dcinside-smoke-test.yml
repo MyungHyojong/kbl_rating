@@ -1,0 +1,70 @@
+name: DCInside connection smoke test
+
+on:
+  workflow_dispatch:
+    inputs:
+      page:
+        description: "DCInside 남자농구 마이너 갤러리에서 저장할 단일 페이지"
+        required: true
+        default: "1"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  save-one-list-page:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install crawler dependencies
+        run: python -m pip install --upgrade pip selenium
+
+      - name: Record installed browser versions
+        run: |
+          google-chrome --version || chromium --version || true
+          python -c "import selenium; print('selenium', selenium.__version__)"
+
+      - name: Save one DCInside list page slowly
+        id: crawler
+        continue-on-error: true
+        run: |
+          mkdir -p github_action_artifact
+          python dcinside_basketball_html_saver.py \
+            --first-page "${{ inputs.page }}" \
+            --last-page "${{ inputs.page }}" \
+            --date "${{ github.run_id }}" \
+            --output-dir github_action_artifact \
+            --headless \
+            --min-delay 5 \
+            --max-delay 7
+
+      - name: Write test result summary
+        run: |
+          echo "## DCInside connection smoke test" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Requested page: ${{ inputs.page }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Crawler outcome: **${{ steps.crawler.outcome }}**" >> "$GITHUB_STEP_SUMMARY"
+          echo "- The downloaded HTML (if present) is attached below as an artifact." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload downloaded HTML and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dcinside-smoke-test-${{ github.run_id }}
+          path: |
+            github_action_artifact/**
+            *.log
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Mark failed crawler as a failed test
+        if: steps.crawler.outcome != 'success'
+        run: exit 1

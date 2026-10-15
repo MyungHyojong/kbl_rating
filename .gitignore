@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+runs/
+dcinside_basketball*_html/
+*.log
+gemini_*checkpoint*.json
