@@ -14,7 +14,11 @@ BASE = Path(__file__).resolve().parent
 
 
 def git(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(["git", *args], cwd=BASE, text=True, capture_output=True, check=check)
+    result = subprocess.run(["git", *args], cwd=BASE, text=True, capture_output=True)
+    if check and result.returncode:
+        detail = (result.stderr or result.stdout).strip()
+        raise RuntimeError(f"git {' '.join(args)} 실패 (exit {result.returncode}): {detail}")
+    return result
 
 
 def main() -> None:
