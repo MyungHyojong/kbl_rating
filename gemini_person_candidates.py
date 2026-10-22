@@ -16,6 +16,7 @@ import time
 from pathlib import Path
 
 try:
+    import httpx
     from google import genai
     from google.genai import errors, types
     from openpyxl import load_workbook
@@ -37,7 +38,7 @@ MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-lite-latest")
 FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-flash-latest")
 BATCH_SIZE = 100
 PAUSE_SECONDS = 1.0
-MAX_SERVER_RETRIES = 2
+MAX_SERVER_RETRIES = 4
 
 HOME_TEAM = "울산 현대모비스"
 AWAY_TEAM = "원주 DB"
@@ -248,14 +249,17 @@ def call_gemini(client: genai.Client, prompt: str, batch_label: str):
                     model=model, contents=prompt,
                     config=types.GenerateContentConfig(response_mime_type="application/json", temperature=0.0, max_output_tokens=8192),
                 )
-            except errors.ServerError as error:
+            except (errors.ServerError, httpx.HTTPError, OSError, TimeoutError) as error:
                 last_error = error
                 if attempt == MAX_SERVER_RETRIES:
                     break
-                seconds = 3 * (2 ** (attempt - 1))
-                print(f"{batch_label}: Gemini 503. {seconds}초 후 재시도 ({attempt}/{MAX_SERVER_RETRIES})")
+                seconds = 5 * (2 ** (attempt - 1))
+                print(
+                    f"{batch_label}: Gemini {type(error).__name__}. "
+                    f"{seconds}초 후 재시도 ({attempt}/{MAX_SERVER_RETRIES})"
+                )
                 time.sleep(seconds)
-    raise RuntimeError("Gemini 서버 과부하로 배치를 처리하지 못했습니다. 체크포인트는 보존됩니다.") from last_error
+    raise RuntimeError("Gemini 연결 오류로 배치를 처리하지 못했습니다. 체크포인트는 보존됩니다.") from last_error
 
 
 def evaluate_batch(client: genai.Client, posts: list[dict[str, str]], post_ids: list[int], aliases: list[tuple[str, str]], batch_number: int) -> dict[int, list[dict[str, object]]]:
