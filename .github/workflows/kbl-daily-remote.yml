@@ -2,8 +2,11 @@ name: KBL daily ratings
 
 on:
   schedule:
-    # GitHub Actions cron is UTC: Mon–Fri 21:30 Asia/Seoul.
+    # GitHub Actions cron is UTC.
+    # Mon–Fri 21:30 Asia/Seoul: 30 DCInside list pages.
     - cron: "30 12 * * 1-5"
+    # Sat–Sun 17:00 Asia/Seoul: 80 DCInside list pages.
+    - cron: "0 8 * * 0,6"
   workflow_dispatch:
     inputs:
       run_date:
@@ -11,7 +14,7 @@ on:
         required: false
         type: string
       pages:
-        description: "목록 마지막 페이지 (비우면 1경기=30, 2경기 이상=60)"
+        description: "목록 마지막 페이지 (수동 실행에서만 지정; 자동은 평일 30·주말 80)"
         required: false
         type: string
       publish_pages:
@@ -35,6 +38,7 @@ jobs:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       # Scheduled workflows publish automatically. Manual executions may opt out.
       PUBLISH_TEAM_PAGES: ${{ (github.event_name == 'schedule' || inputs.publish_pages) && '1' || '0' }}
+      SCHEDULE_PAGES: ${{ github.event.schedule == '0 8 * * 0,6' && '80' || '30' }}
       PYTHONUTF8: "1"
       TZ: Asia/Seoul
 
@@ -71,7 +75,11 @@ jobs:
         run: |
           args=()
           if [ -n "${{ inputs.run_date }}" ]; then args+=(--date "${{ inputs.run_date }}"); fi
-          if [ -n "${{ inputs.pages }}" ]; then args+=(--pages "${{ inputs.pages }}"); fi
+          if [ -n "${{ inputs.pages }}" ]; then
+            args+=(--pages "${{ inputs.pages }}")
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            args+=(--pages "$SCHEDULE_PAGES")
+          fi
           python weekday_kbl_runner.py "${args[@]}"
 
       - name: Add run summary
