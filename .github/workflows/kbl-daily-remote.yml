@@ -1,0 +1,94 @@
+name: KBL daily ratings
+
+on:
+  schedule:
+    # GitHub Actions cron is UTC: Mon–Fri 21:30 Asia/Seoul.
+    - cron: "30 12 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      run_date:
+        description: "KBL 경기일 (YYYYMMDD, 비우면 UTC 오늘)"
+        required: false
+        type: string
+      pages:
+        description: "목록 마지막 페이지 (비우면 1경기=30, 2경기 이상=60)"
+        required: false
+        type: string
+      publish_pages:
+        description: "성공한 docs/ 팀 페이지를 main에 커밋"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kbl-daily-ratings
+  cancel-in-progress: false
+
+jobs:
+  collect-and-rate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      # Scheduled workflows publish automatically. Manual executions may opt out.
+      PUBLISH_TEAM_PAGES: ${{ (github.event_name == 'schedule' || inputs.publish_pages) && '1' || '0' }}
+      PYTHONUTF8: "1"
+      TZ: Asia/Seoul
+
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
+
+      - name: Verify headless Chrome
+        run: |
+          google-chrome --version
+          python -c "from selenium import webdriver; from selenium.webdriver.chrome.options import Options; o=Options(); o.add_argument('--headless=new'); o.add_argument('--no-sandbox'); d=webdriver.Chrome(options=o); print(d.title); d.quit()"
+
+      - name: Run KBL pipeline
+        id: pipeline
+        continue-on-error: true
+        shell: bash
+        run: |
+          args=()
+          if [ -n "${{ inputs.run_date }}" ]; then args+=(--date "${{ inputs.run_date }}"); fi
+          if [ -n "${{ inputs.pages }}" ]; then args+=(--pages "${{ inputs.pages }}"); fi
+          python weekday_kbl_runner.py "${args[@]}"
+
+      - name: Add run summary
+        if: always()
+        shell: bash
+        run: |
+          echo "## KBL daily ratings" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Pipeline: **${{ steps.pipeline.outcome }}**" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Raw DCInside HTML and Gemini CSVs are stored only as a private workflow artifact." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Public team pages are committed only when the pipeline completes." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload private run artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kbl-run-${{ github.run_id }}
+          path: |
+            runs/**
+            *.log
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Fail if pipeline did not complete
+        if: steps.pipeline.outcome != 'success'
+        run: exit 1
