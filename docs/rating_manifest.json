@@ -14,5 +14,21 @@
     "best_player": "칼 타마요",
     "best_rating": "9.6",
     "url": "games/20261015/S49G01N21/창원-LG.html"
+  },
+  {
+    "date": "20261022",
+    "game": "S49G01N32",
+    "team": "울산 현대모비스",
+    "best_player": "다리우스 베즐리",
+    "best_rating": "10.0",
+    "url": "games/20261022/S49G01N32/울산-현대모비스.html"
+  },
+  {
+    "date": "20261022",
+    "game": "S49G01N32",
+    "team": "창원 LG",
+    "best_player": "유기상",
+    "best_rating": "7.1",
+    "url": "games/20261022/S49G01N32/창원-LG.html"
   }
 ]
