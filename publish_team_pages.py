@@ -6,6 +6,7 @@ stages source code, raw community HTML, CSVs, or credentials.
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 from pathlib import Path
 
@@ -19,6 +20,14 @@ def git(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
         detail = (result.stderr or result.stdout).strip()
         raise RuntimeError(f"git {' '.join(args)} 실패 (exit {result.returncode}): {detail}")
     return result
+
+
+def configure_actions_identity() -> None:
+    """Set a local author only for GitHub-hosted automation commits."""
+    if os.getenv("GITHUB_ACTIONS") != "true":
+        return
+    git("config", "user.name", "github-actions[bot]")
+    git("config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com")
 
 
 def main() -> None:
@@ -37,6 +46,7 @@ def main() -> None:
     if args.dry_run:
         print("검증만 완료했습니다. --dry-run이므로 GitHub에 푸시하지 않았습니다.")
         return
+    configure_actions_identity()
     git("add", "--", "docs")
     git("commit", "-m", args.message)
     git("push", "origin", "HEAD")
