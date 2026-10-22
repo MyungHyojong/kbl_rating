@@ -129,8 +129,8 @@ def main() -> None:
 
     default_pages = 30 if len(confirmed) == 1 else 60
     pages = args.pages or default_pages
-    if pages < 1 or pages > 60:
-        raise ValueError("--pages는 1~60 범위여야 합니다.")
+    if pages < 1 or pages > 80:
+        raise ValueError("--pages는 1~80 범위여야 합니다.")
     if args.from_game < 1 or args.from_game > len(confirmed):
         raise ValueError(f"--from-game은 1~{len(confirmed)} 범위여야 합니다.")
     shared_html = BASE / "runs" / args.date / "shared_html"

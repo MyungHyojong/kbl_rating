@@ -36,6 +36,8 @@ jobs:
     timeout-minutes: 90
     env:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
       # Scheduled workflows publish automatically. Manual executions may opt out.
       PUBLISH_TEAM_PAGES: ${{ (github.event_name == 'schedule' || inputs.publish_pages) && '1' || '0' }}
       SCHEDULE_PAGES: ${{ github.event.schedule == '0 8 * * 0,6' && '80' || '30' }}
@@ -74,13 +76,21 @@ jobs:
         shell: bash
         run: |
           args=()
-          if [ -n "${{ inputs.run_date }}" ]; then args+=(--date "${{ inputs.run_date }}"); fi
+          run_date="${{ inputs.run_date }}"
+          if [ -z "$run_date" ]; then run_date="$(date +%Y%m%d)"; fi
+          echo "RUN_DATE=$run_date" >> "$GITHUB_ENV"
+          args+=(--date "$run_date")
           if [ -n "${{ inputs.pages }}" ]; then
             args+=(--pages "${{ inputs.pages }}")
           elif [ "${{ github.event_name }}" = "schedule" ]; then
             args+=(--pages "$SCHEDULE_PAGES")
           fi
           python weekday_kbl_runner.py "${args[@]}"
+
+      - name: Send completed cards to ntfy
+        if: steps.pipeline.outcome == 'success'
+        shell: bash
+        run: python ntfy_notify.py --input-dir "runs/$RUN_DATE"
 
       - name: Add run summary
         if: always()
