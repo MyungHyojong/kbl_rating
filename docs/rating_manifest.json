@@ -30,5 +30,53 @@
     "best_player": "유기상",
     "best_rating": "7.1",
     "url": "games/20261022/S49G01N32/창원-LG.html"
+  },
+  {
+    "date": "20261024",
+    "game": "S49G01N34",
+    "team": "창원 LG",
+    "best_player": "아치 굿윈",
+    "best_rating": "8.1",
+    "url": "games/20261024/S49G01N34/창원-LG.html"
+  },
+  {
+    "date": "20261024",
+    "game": "S49G01N34",
+    "team": "서울 SK",
+    "best_player": "김낙현",
+    "best_rating": "9.9",
+    "url": "games/20261024/S49G01N34/서울-SK.html"
+  },
+  {
+    "date": "20261024",
+    "game": "S49G01N35",
+    "team": "울산 현대모비스",
+    "best_player": "다리우스 베즐리",
+    "best_rating": "9.8",
+    "url": "games/20261024/S49G01N35/울산-현대모비스.html"
+  },
+  {
+    "date": "20261024",
+    "game": "S49G01N35",
+    "team": "서울 삼성",
+    "best_player": "이관희",
+    "best_rating": "9.9",
+    "url": "games/20261024/S49G01N35/서울-삼성.html"
+  },
+  {
+    "date": "20261024",
+    "game": "S49G01N36",
+    "team": "부산 KCC",
+    "best_player": "허웅",
+    "best_rating": "9.7",
+    "url": "games/20261024/S49G01N36/부산-KCC.html"
+  },
+  {
+    "date": "20261024",
+    "game": "S49G01N36",
+    "team": "고양 소노",
+    "best_player": "이재도",
+    "best_rating": "9.6",
+    "url": "games/20261024/S49G01N36/고양-소노.html"
   }
 ]
