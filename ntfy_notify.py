@@ -8,7 +8,9 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import time
 from pathlib import Path
+from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
@@ -31,10 +33,20 @@ def attachment_name(path: Path, position: int) -> str:
     return f"kbl-{kind}-{position:02d}{path.suffix.lower()}"
 
 
-def publish(server: str, topic: str, token: str, path: Path, position: int) -> None:
-    title = "KBL player ratings" if path.suffix.lower() == ".png" else "KBL Instagram caption"
+def publish(
+    server: str,
+    topic: str,
+    token: str,
+    path: Path,
+    position: int,
+    total: int,
+) -> None:
+    """Upload one attachment with a distinct title and bounded retries."""
+    kind = "rating card" if path.suffix.lower() == ".png" else "Instagram caption"
     headers = {
-        "Title": title,
+        # A unique title stops mobile clients from presenting all cards as one
+        # visually identical grouped notification.
+        "Title": f"KBL {kind} {position}/{total}",
         "Tags": "basketball",
         "Priority": "4",
         "Filename": attachment_name(path, position),
@@ -43,10 +55,26 @@ def publish(server: str, topic: str, token: str, path: Path, position: int) -> N
     if token:
         headers["Authorization"] = f"Bearer {token}"
     endpoint = f"{server.rstrip('/')}/{quote(topic, safe='')}"
-    request = Request(endpoint, data=path.read_bytes(), headers=headers, method="PUT")
-    with urlopen(request, timeout=45) as response:
-        if not 200 <= response.status < 300:
-            raise RuntimeError(f"ntfy 전송 실패: HTTP {response.status}")
+    payload = path.read_bytes()
+
+    last_error: Exception | None = None
+    for attempt in range(1, 4):
+        try:
+            request = Request(endpoint, data=payload, headers=headers, method="PUT")
+            with urlopen(request, timeout=45) as response:
+                if 200 <= response.status < 300:
+                    print(f"ntfy 수락: {path.name} (HTTP {response.status})")
+                    return
+                raise RuntimeError(f"HTTP {response.status}")
+        except (HTTPError, URLError, TimeoutError, OSError, RuntimeError) as error:
+            last_error = error
+            if attempt == 3:
+                break
+            wait_seconds = attempt * 3
+            print(f"ntfy 재시도: {path.name} — {error}; {wait_seconds}초 후")
+            time.sleep(wait_seconds)
+
+    raise RuntimeError(f"ntfy 전송 실패 ({path.name}): {last_error}")
 
 
 def main() -> None:
@@ -65,10 +93,15 @@ def main() -> None:
     if not outputs:
         raise FileNotFoundError(f"전송할 카드 PNG 또는 캡션 TXT가 없습니다: {args.input_dir}")
 
+    total = len(outputs)
     for position, path in enumerate(outputs, start=1):
-        print(f"ntfy {'검증' if args.dry_run else '전송'}: {path}")
+        print(f"ntfy {'검증' if args.dry_run else '전송'} ({position}/{total}): {path}")
         if not args.dry_run:
-            publish(server, topic, token, path, position)
+            publish(server, topic, token, path, position, total)
+            # Keep attachments visibly separate in mobile notification clients
+            # without materially delaying the overall workflow.
+            if position < total:
+                time.sleep(1.5)
     print(f"ntfy 완료: {len(outputs)}개 파일")
 
 
