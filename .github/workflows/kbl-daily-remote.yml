@@ -5,8 +5,9 @@ on:
     # GitHub Actions cron is UTC.
     # Mon–Fri 21:30 Asia/Seoul: 30 DCInside list pages.
     - cron: "30 12 * * 1-5"
-    # Sat–Sun 17:00 Asia/Seoul: 80 DCInside list pages.
-    - cron: "0 8 * * 0,6"
+    # Sat–Sun 17:07 Asia/Seoul: 80 DCInside list pages.
+    # Avoid an exact-hour cron slot, which GitHub may delay under load.
+    - cron: "7 8 * * 0,6"
   workflow_dispatch:
     inputs:
       run_date:
@@ -40,7 +41,7 @@ jobs:
       NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
       # Scheduled workflows publish automatically. Manual executions may opt out.
       PUBLISH_TEAM_PAGES: ${{ (github.event_name == 'schedule' || inputs.publish_pages) && '1' || '0' }}
-      SCHEDULE_PAGES: ${{ github.event.schedule == '0 8 * * 0,6' && '80' || '30' }}
+      SCHEDULE_PAGES: ${{ github.event.schedule == '7 8 * * 0,6' && '80' || '30' }}
       PYTHONUTF8: "1"
       TZ: Asia/Seoul
 
