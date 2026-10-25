@@ -78,5 +78,53 @@
     "best_player": "이재도",
     "best_rating": "9.6",
     "url": "games/20261024/S49G01N36/고양-소노.html"
+  },
+  {
+    "date": "20261025",
+    "game": "S49G01N37",
+    "team": "수원 KT",
+    "best_player": "전성현",
+    "best_rating": "8.8",
+    "url": "games/20261025/S49G01N37/수원-KT.html"
+  },
+  {
+    "date": "20261025",
+    "game": "S49G01N37",
+    "team": "서울 SK",
+    "best_player": "자밀 워니",
+    "best_rating": "7.5",
+    "url": "games/20261025/S49G01N37/서울-SK.html"
+  },
+  {
+    "date": "20261025",
+    "game": "S49G01N38",
+    "team": "원주 DB",
+    "best_player": "레이션 해먼즈",
+    "best_rating": "9.9",
+    "url": "games/20261025/S49G01N38/원주-DB.html"
+  },
+  {
+    "date": "20261025",
+    "game": "S49G01N38",
+    "team": "안양 정관장",
+    "best_player": "렌즈 아반도",
+    "best_rating": "10.0",
+    "url": "games/20261025/S49G01N38/안양-정관장.html"
+  },
+  {
+    "date": "20261025",
+    "game": "S49G01N39",
+    "team": "서울 삼성",
+    "best_player": "한호빈",
+    "best_rating": "9.9",
+    "url": "games/20261025/S49G01N39/서울-삼성.html"
+  },
+  {
+    "date": "20261025",
+    "game": "S49G01N39",
+    "team": "대구 한국가스공사",
+    "best_player": "샘조세프 벨란겔",
+    "best_rating": "9.3",
+    "url": "games/20261025/S49G01N39/대구-한국가스공사.html"
   }
 ]
