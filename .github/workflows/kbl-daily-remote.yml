@@ -3,8 +3,8 @@ name: KBL daily ratings
 on:
   schedule:
     # GitHub Actions cron is UTC.
-    # Mon–Fri 21:30 Asia/Seoul: 30 DCInside list pages.
-    - cron: "30 12 * * 1-5"
+    # Mon–Fri 21:00 Asia/Seoul: 30 DCInside list pages.
+    - cron: "0 12 * * 1-5"
     # Sat–Sun 17:07 Asia/Seoul: 80 DCInside list pages.
     # Avoid an exact-hour cron slot, which GitHub may delay under load.
     - cron: "7 8 * * 0,6"
