@@ -126,5 +126,53 @@
     "best_player": "샘조세프 벨란겔",
     "best_rating": "9.3",
     "url": "games/20261025/S49G01N39/대구-한국가스공사.html"
+  },
+  {
+    "date": "20261031",
+    "game": "S49G01N45",
+    "team": "원주 DB",
+    "best_player": "레이션 해먼즈",
+    "best_rating": "7.5",
+    "url": "games/20261031/S49G01N45/원주-DB.html"
+  },
+  {
+    "date": "20261031",
+    "game": "S49G01N45",
+    "team": "부산 KCC",
+    "best_player": "루이스 킹",
+    "best_rating": "9.6",
+    "url": "games/20261031/S49G01N45/부산-KCC.html"
+  },
+  {
+    "date": "20261031",
+    "game": "S49G01N46",
+    "team": "수원 KT",
+    "best_player": "미구엘 옥존",
+    "best_rating": "9.1",
+    "url": "games/20261031/S49G01N46/수원-KT.html"
+  },
+  {
+    "date": "20261031",
+    "game": "S49G01N46",
+    "team": "안양 정관장",
+    "best_player": "문유현",
+    "best_rating": "7.9",
+    "url": "games/20261031/S49G01N46/안양-정관장.html"
+  },
+  {
+    "date": "20261031",
+    "game": "S49G01N47",
+    "team": "울산 현대모비스",
+    "best_player": "김경원",
+    "best_rating": "7.0",
+    "url": "games/20261031/S49G01N47/울산-현대모비스.html"
+  },
+  {
+    "date": "20261031",
+    "game": "S49G01N47",
+    "team": "대구 한국가스공사",
+    "best_player": "라건아",
+    "best_rating": "8.4",
+    "url": "games/20261031/S49G01N47/대구-한국가스공사.html"
   }
 ]
